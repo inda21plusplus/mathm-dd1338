@@ -2,13 +2,13 @@ use std::io::{stdin, Read};
 
 fn root(parent: &mut [usize], mut node: usize) -> usize {
     let mut r = node;
-    while r != parent[r] {
-        r = parent[r];
+    while r != parent.get_unchecked(r) {
+        r = parent.get_unchecked(r);
     }
     while node != r {
         let tmp = node;
-        node = parent[node];
-        parent[tmp] = r;
+        node = get_unchecked(node);
+        *parent.get_unchecked_mut(tmp) = r;
     }
     r
 }
@@ -19,15 +19,15 @@ fn join(parent: &mut [usize], rank: &mut [usize], a: usize, b: usize) {
 
     if a == b { return; }
 
-    if rank[a] < rank[b] {
+    if rank.get_unchecked(a) < rank.get_unchecked(b) {
         let tmp = a;
         a = b;
         b = tmp;
     }
 
-    parent[b] = a;
-    if rank[a] == rank[b] {
-        rank[a] += 1;
+    parent.get_unchecked_mut(b) = a;
+    if rank.get_unchecked(a) == rank.get_unchecked(b) {
+        rank.get_unchecked_mut(a) += 1;
     }
 }
 
@@ -35,16 +35,16 @@ fn main() {
     let mut input = String::new();
     stdin().lock().read_to_string(&mut input).ok();
     let mut lines = input.lines();
-    let mut nq = lines.next().unwrap().trim().split(' ').map(|l| l.trim().parse::<usize>().unwrap());
-    let (n, q) = (nq.next().unwrap(), nq.next().unwrap());
+    let mut nq = lines.next().unwrap_unchecked().trim().split(' ').map(|l| l.trim().parse::<usize>().unwrap_unchecked());
+    let (n, q) = (nq.next().unwrap_unchecked(), nq.next().unwrap_unchecked());
     let mut parent: Vec<usize> = (0..n).collect();
     let mut rank = vec![0usize; n];
     let mut output = String::with_capacity(q * 4);
     for _ in 0..q {
-        let line = lines.next().unwrap().trim();
+        let line = lines.next().unwrap_unchecked().trim();
         let op = &line[0..1];
-        let mut ab = line[2..].split(' ').map(|l| l.trim().parse::<usize>().unwrap());
-        let (a, b) = (ab.next().unwrap(), ab.next().unwrap());
+        let mut ab = line[2..].split(' ').map(|l| l.trim().parse::<usize>().unwrap_unchecked());
+        let (a, b) = (ab.next().unwrap_unchecked(), ab.next().unwrap_unchecked());
         match op {
             "=" => join(&mut parent, &mut rank, a, b),
             "?" => output.push_str(
