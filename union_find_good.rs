@@ -28,25 +28,30 @@ fn join(parent: &mut [usize], rank: &mut [usize], a: usize, b: usize) {
 }
 
 fn main() {
-    let mut line = String::new();
-    stdin().lock().read_line(&mut line).ok();
-    let mut nq = line.trim().split(' ').map(|l| l.parse::<usize>().unwrap());
+    let mut input = String::new();
+    stdin().lock().read_read_to_string(&mut input).ok();
+    let mut lines = input.lines();
+    let mut nq = lines.next().trim().split(' ').map(|l| l.trim().parse::<usize>().unwrap());
     let (n, q) = (nq.next().unwrap(), nq.next().unwrap());
     let mut parent: Vec<usize> = (0..n).collect();
     let mut rank = vec![0usize; n];
+    let mut output = String::with_capacity(q * 4);
     for _ in 0..q {
-        line.clear();
-        stdin().lock().read_line(&mut line).ok();
+        let line = lines.next().trim();
         let op = &line[0..1];
         let mut ab = line[2..].split(' ').map(|l| l.trim().parse::<usize>().unwrap());
         let (a, b) = (ab.next().unwrap(), ab.next().unwrap());
         match op {
             "=" => join(&mut parent, &mut rank, a, b),
-            "?" => println!(
-                "{}",
-                if root(&mut parent, a) == root(&mut parent, b) { "yes" } else { "no" }
+            "?" => output.push_str(
+                if root(&mut parent, a) == root(&mut parent, b) {
+                    "yes\n"
+                } else {
+                    "no\n"
+                },
             ),
             _ => (),
         }
     }
+    println("{}", output);
 }
