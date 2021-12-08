@@ -13,7 +13,7 @@ fn root(parent: &mut [usize], mut node: usize) -> usize {
     r
 }
 
-fn join(parent: &mut [usize], rank: &mut [usize], a: usize, b: usize) {
+fn join(parent: &mut [usize], a: usize, b: usize) {
     let a = root(parent, a);
     let b = root(parent, b);
     parent[a] = b;
@@ -25,7 +25,6 @@ fn main() {
     let mut nq = line.trim().split(' ').map(|l| l.parse::<usize>().unwrap());
     let (n, q) = (nq.next().unwrap(), nq.next().unwrap());
     let mut parent: Vec<usize> = (0..n).collect();
-    let mut rank = vec![0usize; n];
     for _ in 0..q {
         line.clear();
         stdin().lock().read_line(&mut line).ok();
@@ -33,7 +32,7 @@ fn main() {
         let mut ab = line[2..].split(' ').map(|l| l.trim().parse::<usize>().unwrap());
         let (a, b) = (ab.next().unwrap(), ab.next().unwrap());
         match op {
-            "=" => join(&mut parent, &mut rank, a, b),
+            "=" => join(&mut parent, a, b),
             "?" => println!(
                 "{}",
                 if root(&mut parent, a) == root(&mut parent, b) { "yes" } else { "no" }

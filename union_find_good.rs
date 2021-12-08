@@ -14,8 +14,8 @@ fn root(parent: &mut [usize], mut node: usize) -> usize {
 }
 
 fn join(parent: &mut [usize], rank: &mut [usize], a: usize, b: usize) {
-    let a = root(parent, a);
-    let b = root(parent, b);
+    let mut a = root(parent, a);
+    let mut b = root(parent, b);
     if rank[a] < rank[b] {
         let tmp = a;
         a = b;
