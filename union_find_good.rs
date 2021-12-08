@@ -1,6 +1,6 @@
 use std::io::{stdin, Read};
 
-fn root(parent: &mut [usize], mut node: usize) -> usize {
+unsafe fn root(parent: &mut [usize], mut node: usize) -> usize {
     let mut r = node;
     while r != *parent.get_unchecked(r) {
         r = *parent.get_unchecked(r);
@@ -13,7 +13,7 @@ fn root(parent: &mut [usize], mut node: usize) -> usize {
     r
 }
 
-fn join(parent: &mut [usize], rank: &mut [usize], a: usize, b: usize) {
+unsafe fn join(parent: &mut [usize], rank: &mut [usize], a: usize, b: usize) {
     let mut a = root(parent, a);
     let mut b = root(parent, b);
 
@@ -31,7 +31,7 @@ fn join(parent: &mut [usize], rank: &mut [usize], a: usize, b: usize) {
     }
 }
 
-fn main() {
+fn main() { unsafe {
     let mut input = String::new();
     stdin().lock().read_to_string(&mut input).ok();
     let mut lines = input.lines();
@@ -58,4 +58,4 @@ fn main() {
         }
     }
     println!("{}", output);
-}
+} }
