@@ -29,7 +29,7 @@ fn join(parent: &mut [usize], rank: &mut [usize], a: usize, b: usize) {
 
 fn main() {
     let mut input = String::new();
-    stdin().lock().read_read_to_string(&mut input).ok();
+    stdin().lock().read_to_string(&mut input).ok();
     let mut lines = input.lines();
     let mut nq = lines.next().unwrap().trim().split(' ').map(|l| l.trim().parse::<usize>().unwrap());
     let (n, q) = (nq.next().unwrap(), nq.next().unwrap());
