@@ -23,7 +23,7 @@ fn main() {
     let mut nq = line.trim().split(' ').map(|l| l.parse::<usize>().unwrap());
     let (n, q) = (nq.next().unwrap(), nq.next().unwrap());
     let mut parent: Vec<usize> = (0..n).collect();
-    loop {
+    for _ in 0..q {
         line.clear();
         stdin().lock().read_line(&mut line).ok();
         let op = &line[0..1];
