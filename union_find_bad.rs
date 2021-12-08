@@ -27,8 +27,7 @@ fn main() {
         line.clear();
         stdin().lock().read_line(&mut line).ok();
         let op = &line[0..1];
-        let mut ab = line[2..].split(' ').map(|l| l.parse::<usize>().unwrap());
-        let (a, b) = (ab.next().unwrap(), ab.next().unwrap());
+        let mut ab = line[2..].split(' ').map(|l| l.trim().unwrap());
         match op {
             "=" => join(&mut parent, a, b),
             "?" => println!(
