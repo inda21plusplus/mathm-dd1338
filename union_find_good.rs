@@ -53,5 +53,5 @@ fn main() {
             _ => (),
         }
     }
-    println("{}", output);
+    println!("{}", output);
 }
