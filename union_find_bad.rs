@@ -24,6 +24,18 @@ fn main() {
     let (n, q) = (nq.next().unwrap(), nq.next().unwrap());
     let mut parent: Vec<usize> = (0..n).collect();
     loop {
-
+        line.clear();
+        stdin().lock().read_line(&mut line).ok();
+        let op = &line[0..1];
+        let mut ab = line[2..].split(' ').map(|l| l.parse::<usize>().unwrap());
+        let (a, b) = (ab.next().unwrap(), ab.next().unwrap());
+        match op {
+            "=" => join(parent, a, b),
+            "?" => println!(
+                "{}",
+                if root(parent, a) == root(parent, b) { "yes" } else { "no" }
+            ),
+            _ => (),
+        }
     }
 }
