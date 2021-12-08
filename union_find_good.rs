@@ -31,13 +31,13 @@ fn main() {
     let mut input = String::new();
     stdin().lock().read_read_to_string(&mut input).ok();
     let mut lines = input.lines();
-    let mut nq = lines.next().trim().split(' ').map(|l| l.trim().parse::<usize>().unwrap());
+    let mut nq = lines.next().unwrap().trim().split(' ').map(|l| l.trim().parse::<usize>().unwrap());
     let (n, q) = (nq.next().unwrap(), nq.next().unwrap());
     let mut parent: Vec<usize> = (0..n).collect();
     let mut rank = vec![0usize; n];
     let mut output = String::with_capacity(q * 4);
     for _ in 0..q {
-        let line = lines.next().trim();
+        let line = lines.next().unwrap().trim();
         let op = &line[0..1];
         let mut ab = line[2..].split(' ').map(|l| l.trim().parse::<usize>().unwrap());
         let (a, b) = (ab.next().unwrap(), ab.next().unwrap());
