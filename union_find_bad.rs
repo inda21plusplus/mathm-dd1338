@@ -30,10 +30,10 @@ fn main() {
         let mut ab = line[2..].split(' ').map(|l| l.parse::<usize>().unwrap());
         let (a, b) = (ab.next().unwrap(), ab.next().unwrap());
         match op {
-            "=" => join(parent, a, b),
+            "=" => join(&mut parent, a, b),
             "?" => println!(
                 "{}",
-                if root(parent, a) == root(parent, b) { "yes" } else { "no" }
+                if root(&mut parent, a) == root(&mut parent, b) { "yes" } else { "no" }
             ),
             _ => (),
         }
