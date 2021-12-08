@@ -2,12 +2,12 @@ use std::io::{stdin, Read};
 
 fn root(parent: &mut [usize], mut node: usize) -> usize {
     let mut r = node;
-    while r != parent.get_unchecked(r) {
-        r = parent.get_unchecked(r);
+    while r != *parent.get_unchecked(r) {
+        r = *parent.get_unchecked(r);
     }
     while node != r {
         let tmp = node;
-        node = get_unchecked(node);
+        node = *parent.get_unchecked(node);
         *parent.get_unchecked_mut(tmp) = r;
     }
     r
@@ -19,15 +19,15 @@ fn join(parent: &mut [usize], rank: &mut [usize], a: usize, b: usize) {
 
     if a == b { return; }
 
-    if rank.get_unchecked(a) < rank.get_unchecked(b) {
+    if *rank.get_unchecked(a) < *rank.get_unchecked(b) {
         let tmp = a;
         a = b;
         b = tmp;
     }
 
-    parent.get_unchecked_mut(b) = a;
-    if rank.get_unchecked(a) == rank.get_unchecked(b) {
-        rank.get_unchecked_mut(a) += 1;
+    *parent.get_unchecked_mut(b) = a;
+    if *rank.get_unchecked(a) == *rank.get_unchecked(b) {
+        *rank.get_unchecked_mut(a) += 1;
     }
 }
 
