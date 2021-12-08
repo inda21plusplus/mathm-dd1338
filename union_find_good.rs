@@ -1,4 +1,4 @@
-use std::io::{stdin, BufRead};
+use std::io::{stdin, Read};
 
 fn root(parent: &mut [usize], mut node: usize) -> usize {
     let mut r = node;
