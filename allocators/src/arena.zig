@@ -6,9 +6,27 @@ const ArenaAllocator = @This();
 
 const Buffer = struct {
     prev: ?*Buffer,
-    data: [LEN]u8, // TODO: variable size
+    len: usize,
 
-    pub const LEN = 4096 - @sizeOf(*Buffer);
+    pub fn init(len: usize, prev: ?*Buffer, a: Allocator) error{OutOfMemory}!*Buffer {
+        var size = @sizeOf(Buffer) + len;
+        var buf = try a.rawAlloc(size, @alignOf(Buffer), 1, @returnAddress());
+        var this = @ptrCast(*Buffer, @alignCast(@alignOf(Buffer), buf));
+        this.prev = prev;
+        this.len = buf.len - @sizeOf(Buffer);
+        return this;
+    }
+
+    pub fn deinit(this: *Buffer, a: Allocator) void {
+        var ptr = @ptrCast([*]u8, this);
+        var slice = ptr[0 .. @sizeOf(Buffer) + this.len];
+        a.rawFree(slice, @alignOf(Buffer), @returnAddress());
+    }
+
+    pub fn data(this: *Buffer) []u8 {
+        var ptr = @intToPtr([*]u8, @ptrToInt(this) + @sizeOf(Buffer));
+        return ptr[0..this.len];
+    }
 };
 
 underlying: Allocator,
@@ -23,28 +41,29 @@ pub fn allocator(this: *ArenaAllocator) Allocator {
     return Allocator.init(this, alloc, resize, free);
 }
 
-fn create_buffer(this: *ArenaAllocator) error{OutOfMemory}!*Buffer {
-    var new_buffer = @ptrCast(*Buffer, @alignCast(@alignOf(Buffer), try this.underlying.rawAlloc(@sizeOf(Buffer), @alignOf(Buffer), 1, @returnAddress())));
-    new_buffer.prev = this.buffer;
-    this.buffer = new_buffer;
+fn create_buffer(this: *ArenaAllocator, required_len: usize) error{OutOfMemory}!*Buffer {
+    var len = @maximum(4096 - @sizeOf(Buffer), required_len);
 
-    return new_buffer;
+    this.buffer = try Buffer.init(len, this.buffer, this.underlying);
+
+    this.current_index = 0;
+    return this.buffer.?;
 }
 
 fn alloc(this: *ArenaAllocator, len: usize, ptr_align: u29, len_align: u29, ret_addr: usize) error{OutOfMemory}![]u8 {
     _ = len_align;
     _ = ret_addr;
 
-    var buffer = if (this.buffer == null or this.current_index + len > this.buffer.?.data.len)
-        try this.create_buffer()
+    var buffer = if (this.buffer == null or this.current_index + len > this.buffer.?.len)
+        try this.create_buffer(len)
     else
         this.buffer.?;
 
-    var unaligned_ptr = &buffer.data[this.current_index];
+    var unaligned_ptr = &buffer.data()[this.current_index];
     var ptr = mem.alignForward(@ptrToInt(unaligned_ptr), ptr_align);
-    var index = ptr - @ptrToInt(&buffer.data);
+    var index = ptr - @ptrToInt(buffer.data().ptr);
     var end_index = index + len;
-    var buf = buffer.data[index..end_index];
+    var buf = buffer.data()[index..end_index];
     this.current_index = end_index;
 
     return buf;
@@ -57,10 +76,10 @@ fn resize(this: *ArenaAllocator, buf: []u8, buf_align: u29, new_len: usize, len_
 
     var buffer = this.buffer orelse return if (new_len <= buf.len) new_len else null;
 
-    if (@ptrToInt(&buffer.data) + this.current_index != @ptrToInt(buf.ptr) + buf.len)
+    if (@ptrToInt(buffer.data().ptr) + this.current_index != @ptrToInt(buf.ptr) + buf.len)
         return if (new_len <= buf.len) new_len else null;
 
-    if (this.current_index - buf.len + new_len > buffer.data.len)
+    if (this.current_index - buf.len + new_len > buffer.len)
         return null;
 
     this.current_index = this.current_index - buf.len + new_len;
@@ -73,14 +92,14 @@ fn free(this: *ArenaAllocator, buf: []u8, buf_align: u29, ret_addr: usize) void 
 
     var buffer = this.buffer orelse return;
 
-    if (@ptrToInt(&buffer.data) + this.current_index == @ptrToInt(buf.ptr) + buf.len)
+    if (@ptrToInt(buffer.data().ptr) + this.current_index == @ptrToInt(buf.ptr) + buf.len)
         this.current_index -= buf.len;
 }
 
 pub fn deinit(this: *ArenaAllocator) void {
     while (this.buffer) |buffer| {
         var prev: ?*Buffer = buffer.prev;
-        this.underlying.rawFree(@intToPtr([*]u8, @ptrToInt(buffer))[0..@sizeOf(Buffer)], @alignOf(Buffer), @returnAddress());
+        buffer.deinit(this.underlying);
         this.buffer = prev;
     }
 }
