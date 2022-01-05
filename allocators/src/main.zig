@@ -11,7 +11,8 @@ test "arena allocator" {
     var j = try allocator.create(u32);
     i.* = 420;
     j.* = 1337;
-    try testing.expect(i.* != j.*);
+    try testing.expect(i.* == 420);
+    try testing.expect(j.* == 1337);
     allocator.destroy(i);
     allocator.destroy(j);
 }
