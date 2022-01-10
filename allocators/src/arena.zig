@@ -1,3 +1,17 @@
+//! A fast memory allocator that doesn't free underlying memory until the
+//! allocator itself is deinitialized. Allocating is usually O(1) but sometimes
+//! calls to the underlying allocator. Freeing is always O(1) but is most often
+//! a noop.
+//!
+//! ## Example:
+//! ```
+//! var arena = ArenaAllocator.init(std.heap.page_allocator);
+//! defer arena.deinit();
+//! var allocator = arena.allocator();
+//! var x = try allocator.create(u64);
+//! allocator.destroy(x);
+//! ```
+
 const std = @import("std");
 const mem = std.mem;
 const Allocator = mem.Allocator;
