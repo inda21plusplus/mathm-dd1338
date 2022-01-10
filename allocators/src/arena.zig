@@ -16,32 +16,9 @@ const std = @import("std");
 const mem = std.mem;
 const Allocator = mem.Allocator;
 
+const Buffer = @import("buffer.zig");
+
 const ArenaAllocator = @This();
-
-const Buffer = struct {
-    prev: ?*Buffer,
-    len: usize,
-
-    pub fn init(len: usize, prev: ?*Buffer, a: Allocator) error{OutOfMemory}!*Buffer {
-        var size = @sizeOf(Buffer) + len;
-        var buf = try a.rawAlloc(size, @alignOf(Buffer), 1, @returnAddress());
-        var this = @ptrCast(*Buffer, @alignCast(@alignOf(Buffer), buf));
-        this.prev = prev;
-        this.len = buf.len - @sizeOf(Buffer);
-        return this;
-    }
-
-    pub fn deinit(this: *Buffer, a: Allocator) void {
-        var ptr = @ptrCast([*]u8, this);
-        var slice = ptr[0 .. @sizeOf(Buffer) + this.len];
-        a.rawFree(slice, @alignOf(Buffer), @returnAddress());
-    }
-
-    pub fn data(this: *Buffer) []u8 {
-        var ptr = @intToPtr([*]u8, @ptrToInt(this) + @sizeOf(Buffer));
-        return ptr[0..this.len];
-    }
-};
 
 underlying: Allocator,
 buffer: ?*Buffer,
