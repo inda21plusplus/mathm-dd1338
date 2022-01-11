@@ -50,11 +50,11 @@ fn alloc(this: *ArenaAllocator, len: usize, ptr_align: u29, len_align: u29, ret_
     else
         this.buffer.?;
 
-    var unaligned_ptr = &buffer.data()[this.current_index];
+    var unaligned_ptr = &buffer.data(u8)[this.current_index];
     var ptr = mem.alignForward(@ptrToInt(unaligned_ptr), ptr_align);
-    var index = ptr - @ptrToInt(buffer.data().ptr);
+    var index = ptr - @ptrToInt(buffer.data(u8).ptr);
     var end_index = index + len;
-    var buf = buffer.data()[index..end_index];
+    var buf = buffer.data(u8)[index..end_index];
     this.current_index = end_index;
 
     return buf;
@@ -67,7 +67,7 @@ fn resize(this: *ArenaAllocator, buf: []u8, buf_align: u29, new_len: usize, len_
 
     var buffer = this.buffer orelse return if (new_len <= buf.len) new_len else null;
 
-    if (@ptrToInt(buffer.data().ptr) + this.current_index != @ptrToInt(buf.ptr) + buf.len)
+    if (@ptrToInt(buffer.data(u8).ptr) + this.current_index != @ptrToInt(buf.ptr) + buf.len)
         return if (new_len <= buf.len) new_len else null;
 
     if (this.current_index - buf.len + new_len > buffer.len)
@@ -83,7 +83,7 @@ fn free(this: *ArenaAllocator, buf: []u8, buf_align: u29, ret_addr: usize) void 
 
     var buffer = this.buffer orelse return;
 
-    if (@ptrToInt(buffer.data().ptr) + this.current_index == @ptrToInt(buf.ptr) + buf.len)
+    if (@ptrToInt(buffer.data(u8).ptr) + this.current_index == @ptrToInt(buf.ptr) + buf.len)
         this.current_index -= buf.len;
 }
 

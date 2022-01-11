@@ -3,13 +3,16 @@
 //! `Buffer` struct, and this is managed by the buffer itself. Because of this,
 //! you may never have a `Buffer`, but must always have a pointer to it, i.e.
 //! `*Buffer` which must never be dereferenced.
+//! The length of the slice returned from `data` may be smaller than the `len`
+//! provided to `init` if the type `T` has a bigger alignment than `Buffer`
 
 // TODO: check if its possible to add an
 // `this.original_location = @ptrToInt(this)` only when assertions are turned on
 // or whatever and to be able to check if the buffer has been moved when calling
 // `data`.
 
-const Allocator = @import("std").mem.Allocator;
+const mem = @import("std").mem;
+const Allocator = mem.Allocator;
 
 const Buffer = @This();
 
@@ -32,7 +35,12 @@ pub fn deinit(this: *Buffer, a: Allocator) void {
     a.rawFree(slice, @alignOf(Buffer), @returnAddress());
 }
 
-pub fn data(this: *Buffer) []u8 {
-    var ptr = @intToPtr([*]u8, @ptrToInt(this) + @sizeOf(Buffer));
-    return ptr[0..this.len];
+pub fn data(this: *Buffer, comptime T: type) []T {
+    var unaligned_ptr = @ptrToInt(this) + @sizeOf(Buffer);
+    var ptr = mem.alignForward(unaligned_ptr, @alignOf(T));
+
+    var skipped = ptr - unaligned_ptr;
+    var len = (this.len - skipped) / @sizeOf(T);
+
+    return @intToPtr([*]T, ptr)[0..len];
 }
