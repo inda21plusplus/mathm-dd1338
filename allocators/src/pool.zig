@@ -5,13 +5,14 @@ const Allocator = mem.Allocator;
 const Buffer = @import("buffer.zig");
 
 pub fn PoolAllocator(comptime Child: type) type {
-    if (@sizeOf(Child) < @sizeOf(*usize)) {
-        @compileError("Pointer must fit inside PoolAllocator's child type");
-    }
+    const BufferData = union {
+        child: Child,
+        free: ?*@This(),
+    };
 
     return struct {
         underlying: Allocator,
-        last_freed: ?*align(@alignOf(Child)) usize,
+        last_freed: ?*BufferData,
         buffer: ?*Buffer,
         current_index: usize,
 
@@ -36,21 +37,21 @@ pub fn PoolAllocator(comptime Child: type) type {
 
         pub fn create(this: *This) error{OutOfMemory}!*Child {
             if (this.last_freed) |last_freed| {
-                var prev = @intToPtr(?*align(@alignOf(Child)) usize, last_freed.*);
-                var child_ptr = @ptrCast(*Child, last_freed);
+                var prev = last_freed.free;
+                last_freed.* = .{ .child = undefined };
+                var child_ptr = &last_freed.child;
                 this.last_freed = prev;
                 return child_ptr;
             }
 
             var buffer = if (this.bufferFitsChildAtEnd()) this.buffer.? else try this.createBuffer();
 
-            var data_ptr = buffer.data().ptr;
-            var start_ptr = @ptrCast([*]Child, @alignCast(@alignOf(Child), data_ptr));
-            var child_ptr = &start_ptr[this.current_index];
+            var ptr = &buffer.data(BufferData)[this.current_index];
+            ptr.* = .{ .child = undefined };
 
             this.current_index += 1;
 
-            return child_ptr;
+            return &ptr.child;
         }
 
         pub fn new(this: *This, child: Child) error{OutOfMemory}!*Child {
@@ -60,9 +61,9 @@ pub fn PoolAllocator(comptime Child: type) type {
         }
 
         pub fn destroy(this: *This, child_ptr: *Child) void {
-            var ptr = @ptrCast(*align(@alignOf(Child)) usize, child_ptr);
-            ptr.* = @ptrToInt(this.last_freed);
-            this.last_freed = @ptrCast(?*align(@alignOf(Child)) usize, ptr);
+            var ptr = @ptrCast(*BufferData, @alignCast(@alignOf(BufferData), child_ptr));
+            ptr.* = .{ .free = this.last_freed };
+            this.last_freed = ptr;
         }
 
         fn _alloc(this: *This, len: usize, ptr_align: u29, len_align: u29, ret_addr: usize) error{OutOfMemory}![]u8 {
@@ -92,18 +93,15 @@ pub fn PoolAllocator(comptime Child: type) type {
         }
 
         fn createBuffer(this: *This) error{OutOfMemory}!*Buffer {
-            // TODO: when passing @sizeOf(Child) as len there was a segfault.
-            // The allocator should suck in that case but not segfault.
             // TODO: make size of each buffer customizable by user?
-            this.buffer = try Buffer.init(@sizeOf(Child) * 1024, this.buffer, this.underlying);
+            this.buffer = try Buffer.init(@sizeOf(BufferData) * 2048, this.buffer, this.underlying);
             this.current_index = 0;
             return this.buffer.?;
         }
 
         fn bufferFitsChildAtEnd(this: *This) bool {
             if (this.buffer) |buffer| {
-                // NOTE: `buffer.len` might not be a multiple `@sizeOf(Child)`
-                return buffer.len <= (this.current_index + 1) * @sizeOf(Child);
+                return buffer.data(BufferData).len < this.current_index;
             } else {
                 return false;
             }

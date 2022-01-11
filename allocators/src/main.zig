@@ -71,8 +71,10 @@ test "pool: two ints with public interface" {
 }
 
 test "pool: different types" {
-    const types = [_]type{ // u1, u8, u16, u32,
-        u64, u128, u256, u512, u1024, [1024]u8, [256]std.mem.Allocator,
+    const types = [_]type{
+        u1,    u8,       u16,                    u32,
+        u64,   u128,     u256,                   u512,
+        u1024, [1024]u8, [256]std.mem.Allocator,
     };
     inline for (types) |t| {
         const is_int = @typeInfo(t) == .Int;
@@ -81,14 +83,14 @@ test "pool: different types" {
         defer pool.deinit();
         var x = try pool.create();
         defer pool.destroy(x);
-        if (is_int) x.* = 12345;
+        if (is_int) x.* = @truncate(t, 12345);
         var allocator = pool.allocator();
         var y = try allocator.create(t);
         defer allocator.destroy(y);
-        if (is_int) y.* = 13241;
+        if (is_int) y.* = @truncate(t, 13241);
 
-        if (is_int) try testing.expect(x.* == 12345);
-        if (is_int) try testing.expect(y.* == 13241);
+        if (is_int) try testing.expect(x.* == @truncate(t, 12345));
+        if (is_int) try testing.expect(y.* == @truncate(t, 13241));
     }
 }
 
