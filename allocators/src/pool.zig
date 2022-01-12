@@ -4,6 +4,27 @@ const Allocator = mem.Allocator;
 
 const Buffer = @import("buffer.zig");
 
+/// A memory allocator made to allocate a lot of objects of the same type.
+/// Allocation is most often O(1), but sometimes has to call the underlying
+/// allocator. Freeing is always O(1). A `PoolAllocator` of a type smaller than
+/// a pointer will still make each allocation take the size of a pointer.
+///
+/// ## Example:
+/// ```
+/// var pool = PoolAllocator(u1024).init(std.heap.page_allocator);
+/// defer pool.deinit();
+///
+/// var x = try pool.create();
+/// pool.destroy(x);
+///
+/// var allocator = pool.allocator();
+///
+/// var y = try allocator.create(u1024);
+/// allocator.destroy(y);
+///
+/// // This will crash:
+/// var z = allocator.create(u64);
+/// ```
 pub fn PoolAllocator(comptime Child: type) type {
     const BufferData = union {
         child: Child,
@@ -54,19 +75,28 @@ pub fn PoolAllocator(comptime Child: type) type {
             return &ptr.child;
         }
 
-        pub fn new(this: *This, child: Child) error{OutOfMemory}!*Child {
-            var ptr = this.create();
-            ptr.* = child;
-            return ptr;
-        }
-
         pub fn destroy(this: *This, child_ptr: *Child) void {
+            // Here i'm relying on this assert to never fail and it seems like
+            // it doesn't.
+            //
+            // var bd = BufferData{ .child = undefined };
+            // var c_ptr = &bd.child;
+            // var a = @ptrToInt(&bd);
+            // var b = @ptrToInt(@ptrCast(*BufferData, @alignCast(@alignOf(BufferData), c_ptr)));
+            // std.debug.assert(a == b);
+
             var ptr = @ptrCast(*BufferData, @alignCast(@alignOf(BufferData), child_ptr));
             ptr.* = .{ .free = this.last_freed };
             this.last_freed = ptr;
         }
 
-        fn _alloc(this: *This, len: usize, ptr_align: u29, len_align: u29, ret_addr: usize) error{OutOfMemory}![]u8 {
+        fn _alloc(
+            this: *This,
+            len: usize,
+            ptr_align: u29,
+            len_align: u29,
+            ret_addr: usize,
+        ) error{OutOfMemory}![]u8 {
             _ = ret_addr;
 
             if (len != @sizeOf(Child) or ptr_align > @alignOf(Child) or len_align > @sizeOf(Child)) {
@@ -93,8 +123,11 @@ pub fn PoolAllocator(comptime Child: type) type {
         }
 
         fn createBuffer(this: *This) error{OutOfMemory}!*Buffer {
-            // TODO: make size of each buffer customizable by user?
-            this.buffer = try Buffer.init(@sizeOf(BufferData) * 2048, this.buffer, this.underlying);
+            this.buffer = try Buffer.init(
+                @sizeOf(BufferData) * 2048 - @sizeOf(Buffer),
+                this.buffer,
+                this.underlying,
+            );
             this.current_index = 0;
             return this.buffer.?;
         }

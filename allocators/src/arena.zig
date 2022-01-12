@@ -1,7 +1,7 @@
 //! A fast memory allocator that doesn't free underlying memory until the
-//! allocator itself is deinitialized. Allocating is usually O(1) but sometimes
-//! calls to the underlying allocator. Freeing is always O(1) but is most often
-//! a noop.
+//! allocator itself is deinitialized. Allocating is most often O(1) but
+//! sometimes calls to the underlying allocator. Freeing is always O(1) but is
+//! most often a noop.
 //!
 //! ## Example:
 //! ```
