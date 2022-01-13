@@ -2,7 +2,7 @@ const std = @import("std");
 const mem = std.mem;
 const Allocator = mem.Allocator;
 
-const Buffer = @import("buffer.zig");
+const Buffer = @import("Buffer.zig");
 
 /// A memory allocator made to allocate a lot of objects of the same type.
 /// Allocation is most often O(1), but sometimes has to call the underlying

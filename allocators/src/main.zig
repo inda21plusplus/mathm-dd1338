@@ -1,10 +1,10 @@
 const std = @import("std");
 const testing = std.testing;
 
-pub const ArenaAllocator = @import("arena.zig");
-pub const PoolAllocator = @import("pool.zig").PoolAllocator;
+pub const ArenaAllocator = @import("ArenaAllocator.zig");
+pub const PoolAllocator = @import("pool_allocator.zig").PoolAllocator;
 
-const Buffer = @import("buffer.zig");
+const Buffer = @import("Buffer.zig");
 
 test "arena: two ints" {
     var arena = ArenaAllocator.init(testing.allocator);

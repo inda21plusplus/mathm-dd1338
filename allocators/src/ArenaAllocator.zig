@@ -16,7 +16,7 @@ const std = @import("std");
 const mem = std.mem;
 const Allocator = mem.Allocator;
 
-const Buffer = @import("buffer.zig");
+const Buffer = @import("Buffer.zig");
 
 const ArenaAllocator = @This();
 

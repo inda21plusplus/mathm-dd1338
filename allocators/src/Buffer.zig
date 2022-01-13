@@ -2,14 +2,11 @@
 //! previous buffer. The actual memory that the buffer holds is stored after the
 //! `Buffer` struct, and this is managed by the buffer itself. Because of this,
 //! you may never have a `Buffer`, but must always have a pointer to it, i.e.
-//! `*Buffer` which must never be dereferenced.
+//! a `*Buffer` which must never be dereferenced as this results in unchecked
+//! undefind behavior.
+//!
 //! The length of the slice returned from `data` may be smaller than the `len`
 //! provided to `init` if the type `T` has a bigger alignment than `Buffer`
-
-// TODO: check if its possible to add an
-// `this.original_location = @ptrToInt(this)` only when assertions are turned on
-// or whatever and to be able to check if the buffer has been moved when calling
-// `data`.
 
 const mem = @import("std").mem;
 const Allocator = mem.Allocator;
