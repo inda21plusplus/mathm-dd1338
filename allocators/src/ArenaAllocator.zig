@@ -16,12 +16,12 @@ const std = @import("std");
 const mem = std.mem;
 const Allocator = mem.Allocator;
 
-const Buffer = @import("Buffer.zig");
+const Buffer = @import("buffer.zig").Buffer;
 
 const ArenaAllocator = @This();
 
 underlying: Allocator,
-buffer: ?*Buffer,
+buffer: ?*Buffer(u8),
 current_index: usize,
 
 pub fn init(underlying: Allocator) ArenaAllocator {
@@ -32,10 +32,10 @@ pub fn allocator(this: *ArenaAllocator) Allocator {
     return Allocator.init(this, alloc, resize, free);
 }
 
-fn create_buffer(this: *ArenaAllocator, required_len: usize) error{OutOfMemory}!*Buffer {
-    var len = @maximum(4096 - @sizeOf(Buffer), required_len);
+fn create_buffer(this: *ArenaAllocator, required_len: usize) error{OutOfMemory}!*Buffer(u8) {
+    var len = @maximum(4096 - Buffer(u8).header_size, required_len);
 
-    this.buffer = try Buffer.init(len, this.buffer, this.underlying);
+    this.buffer = try Buffer(u8).init(len, this.buffer, this.underlying);
 
     this.current_index = 0;
     return this.buffer.?;
@@ -45,16 +45,16 @@ fn alloc(this: *ArenaAllocator, len: usize, ptr_align: u29, len_align: u29, ret_
     _ = len_align;
     _ = ret_addr;
 
-    var buffer = if (this.buffer == null or this.current_index + len > this.buffer.?.len)
+    var buffer = if (this.buffer == null or this.current_index + len > this.buffer.?.data().len)
         try this.create_buffer(len)
     else
         this.buffer.?;
 
-    var unaligned_ptr = &buffer.data(u8)[this.current_index];
+    var unaligned_ptr = &buffer.data()[this.current_index];
     var ptr = mem.alignForward(@ptrToInt(unaligned_ptr), ptr_align);
-    var index = ptr - @ptrToInt(buffer.data(u8).ptr);
+    var index = ptr - @ptrToInt(buffer.data().ptr);
     var end_index = index + len;
-    var buf = buffer.data(u8)[index..end_index];
+    var buf = buffer.data()[index..end_index];
     this.current_index = end_index;
 
     return buf;
@@ -67,10 +67,10 @@ fn resize(this: *ArenaAllocator, buf: []u8, buf_align: u29, new_len: usize, len_
 
     var buffer = this.buffer orelse return if (new_len <= buf.len) new_len else null;
 
-    if (@ptrToInt(buffer.data(u8).ptr) + this.current_index != @ptrToInt(buf.ptr) + buf.len)
+    if (@ptrToInt(buffer.data().ptr) + this.current_index != @ptrToInt(buf.ptr) + buf.len)
         return if (new_len <= buf.len) new_len else null;
 
-    if (this.current_index - buf.len + new_len > buffer.len)
+    if (this.current_index - buf.len + new_len > buffer.data().len)
         return null;
 
     this.current_index = this.current_index - buf.len + new_len;
@@ -83,13 +83,13 @@ fn free(this: *ArenaAllocator, buf: []u8, buf_align: u29, ret_addr: usize) void 
 
     var buffer = this.buffer orelse return;
 
-    if (@ptrToInt(buffer.data(u8).ptr) + this.current_index == @ptrToInt(buf.ptr) + buf.len)
+    if (@ptrToInt(buffer.data().ptr) + this.current_index == @ptrToInt(buf.ptr) + buf.len)
         this.current_index -= buf.len;
 }
 
 pub fn deinit(this: *ArenaAllocator) void {
     while (this.buffer) |buffer| {
-        var prev: ?*Buffer = buffer.prev;
+        var prev = buffer.prev;
         buffer.deinit(this.underlying);
         this.buffer = prev;
     }

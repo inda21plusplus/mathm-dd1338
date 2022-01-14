@@ -1,10 +1,11 @@
 const std = @import("std");
 const testing = std.testing;
+const Allocator = std.mem.Allocator;
 
 pub const ArenaAllocator = @import("ArenaAllocator.zig");
 pub const PoolAllocator = @import("pool_allocator.zig").PoolAllocator;
 
-const Buffer = @import("Buffer.zig");
+const Buffer = @import("buffer.zig").Buffer;
 
 test "arena: two ints" {
     var arena = ArenaAllocator.init(testing.allocator);
@@ -40,6 +41,14 @@ test "arena: big allocations" {
         for (buf) |c| {
             try testing.expect(c == i);
         }
+    }
+}
+
+test "arena: random operations" {
+    var arena = ArenaAllocator.init(testing.allocator);
+    defer arena.deinit();
+    inline for ([_]type{ u64, u1024, u1, u5 }) |t| {
+        try testRandomOperations(arena.allocator(), t);
     }
 }
 
@@ -105,37 +114,43 @@ test "pool: many allocations" {
         pool.destroy(x);
     }
 }
+
 test "pool: random operations" {
+    inline for ([_]type{ u1, u12, u8, u64, u1024 }) |t| {
+        var pool = PoolAllocator(t).init(testing.allocator);
+        defer pool.deinit();
+        try testRandomOperations(pool.allocator(), t);
+    }
+}
+
+fn testRandomOperations(allocator: Allocator, comptime T: type) !void {
     // NOTE: using set seed to make test reproducible
-    var gen = std.rand.DefaultPrng.init(6969);
-    var rng = gen.random();
-    var pool = PoolAllocator(u64).init(testing.allocator);
-    defer pool.deinit();
-    const Allocation = struct {
-        ptr: *u64,
-        val: u64,
-    };
+    var rng = std.rand.DefaultPrng.init(694201337);
+    var r = rng.random();
+
+    const Allocation = struct { ptr: *T, val: T };
     var allocations = std.ArrayList(Allocation).init(testing.allocator);
     defer allocations.deinit();
+
     var i: usize = 0;
-    while (i < 3_000_000) : (i += 1) {
-        if (rng.boolean() and allocations.items.len > 0) {
-            var index = rng.uintLessThanBiased(usize, allocations.items.len);
+    while (i < 300_000) : (i += 1) {
+        if (r.boolean() or allocations.items.len == 0) {
+            var x = try allocator.create(T);
+            x.* = r.int(T);
+            try allocations.append(.{ .ptr = x, .val = x.* });
+        } else {
+            var index = r.uintLessThanBiased(usize, allocations.items.len);
             var a = allocations.orderedRemove(index);
             try testing.expect(a.val == a.ptr.*);
-            pool.destroy(a.ptr);
-        } else {
-            var x = try pool.create();
-            x.* = rng.int(u64);
-            try allocations.append(.{ .ptr = x, .val = x.* });
+            allocator.destroy(a.ptr);
         }
     }
 }
 
 test "buffer" {
     for ([_]usize{ 1, 4, 8, 32, 64, 1024 }) |len| {
-        var buf = try Buffer.init(len, null, testing.allocator);
-        try testing.expect(buf.len >= len);
+        var buf = try Buffer(u8).init(len, null, testing.allocator);
+        try testing.expect(buf.data().len >= len);
         buf.deinit(testing.allocator);
     }
 }
