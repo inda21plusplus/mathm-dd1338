@@ -15,8 +15,8 @@ pub fn Buffer(comptime T: type) type {
         const This = @This();
 
         prev: ?*This,
-        // The size of the usable buffer in bytes. Does not include the bytes of
-        // this struct itself.
+        /// The size of the usable buffer in bytes. Does not include the bytes
+        /// of this struct itself.
         size: usize,
 
         pub fn init(len: usize, prev: ?*This, a: Allocator) error{OutOfMemory}!*This {

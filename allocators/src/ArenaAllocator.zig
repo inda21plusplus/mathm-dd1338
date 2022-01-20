@@ -28,6 +28,14 @@ pub fn init(underlying: Allocator) ArenaAllocator {
     return ArenaAllocator{ .underlying = underlying, .buffer = null, .current_index = 0 };
 }
 
+pub fn deinit(this: *ArenaAllocator) void {
+    while (this.buffer) |buffer| {
+        var prev = buffer.prev;
+        buffer.deinit(this.underlying);
+        this.buffer = prev;
+    }
+}
+
 pub fn allocator(this: *ArenaAllocator) Allocator {
     return Allocator.init(this, alloc, resize, free);
 }
@@ -85,12 +93,4 @@ fn free(this: *ArenaAllocator, buf: []u8, buf_align: u29, ret_addr: usize) void 
 
     if (@ptrToInt(buffer.data().ptr) + this.current_index == @ptrToInt(buf.ptr) + buf.len)
         this.current_index -= buf.len;
-}
-
-pub fn deinit(this: *ArenaAllocator) void {
-    while (this.buffer) |buffer| {
-        var prev = buffer.prev;
-        buffer.deinit(this.underlying);
-        this.buffer = prev;
-    }
 }
