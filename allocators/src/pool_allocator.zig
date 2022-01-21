@@ -33,8 +33,8 @@ pub fn PoolAllocator(comptime T: type) type {
 
     return struct {
         underlying: Allocator,
-        last_freed: ?*BufferData,
         buffer: ?*Buffer(BufferData),
+        last_freed: ?*BufferData,
         current_index: usize,
 
         const This = @This();
@@ -109,7 +109,7 @@ pub fn PoolAllocator(comptime T: type) type {
             return byte_ptr[0..@sizeOf(T)];
         }
 
-        fn _free(this: *This, buf: []u8, buf_align: u29, ret_addr: usize) void {
+        pub fn _free(this: *This, buf: []u8, buf_align: u29, ret_addr: usize) void {
             _ = ret_addr;
             _ = buf_align;
 

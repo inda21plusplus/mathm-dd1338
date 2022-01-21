@@ -8,6 +8,8 @@ pub const PoolAllocator = @import("pool_allocator.zig").PoolAllocator;
 
 const Buffer = @import("buffer.zig").Buffer;
 
+const _ = @import("seg_tree.zig");
+
 test "arena: two ints" {
     var arena = ArenaAllocator.init(testing.allocator);
     defer arena.deinit();
