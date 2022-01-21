@@ -3,6 +3,7 @@ const testing = std.testing;
 const Allocator = std.mem.Allocator;
 
 pub const ArenaAllocator = @import("ArenaAllocator.zig");
+pub const MultiPoolAllocator = @import("MultiPoolAllocator.zig");
 pub const PoolAllocator = @import("pool_allocator.zig").PoolAllocator;
 
 const Buffer = @import("buffer.zig").Buffer;
@@ -144,6 +145,28 @@ fn testRandomOperations(allocator: Allocator, comptime T: type) !void {
             try testing.expect(a.val == a.ptr.*);
             allocator.destroy(a.ptr);
         }
+    }
+}
+
+test "multi pool: two ints" {
+    var multi_pool = MultiPoolAllocator.init(testing.allocator);
+    defer multi_pool.deinit();
+    var allocator = multi_pool.allocator();
+    var i = try allocator.create(u29);
+    defer allocator.destroy(i);
+    i.* = 1234;
+    var j = try allocator.create(u29);
+    defer allocator.destroy(j);
+    j.* = 4321;
+    try testing.expect(i.* == 1234);
+    try testing.expect(j.* == 4321);
+}
+
+test "multi pool: random operations" {
+    inline for ([_]type{ u1, u12, u8, u64, u1024 }) |t| {
+        var multi_pool = MultiPoolAllocator.init(testing.allocator);
+        defer multi_pool.deinit();
+        try testRandomOperations(multi_pool.allocator(), t);
     }
 }
 
