@@ -64,37 +64,16 @@ fn main() {
         let mut has_outgoing = HashSet::new();
         let mut has_ingoing = HashSet::new();
 
-        let mut visited = [false; N];
-        for &r in &roots {
-            let mut stack = vec![r];
-            'dfs: while let Some(u) = stack.pop() {
-                if visited[u] {
-                    continue;
-                }
-                visited[u] = true;
-                for &v in &adjf[u] {
-                    if root[v] != r {
-                        has_outgoing.insert(r);
-                        break 'dfs;
-                    }
-                    stack.push(v);
+        for u in 0..n {
+            let r = root[u];
+            for &v in &adjf[u] {
+                if root[v] != r {
+                    has_outgoing.insert(r);
                 }
             }
-        }
-        let mut visited = [false; N];
-        for &r in &roots {
-            let mut stack = vec![r];
-            'dfs2: while let Some(u) = stack.pop() {
-                if visited[u] {
-                    continue;
-                }
-                visited[u] = true;
-                for &v in &adjr[u] {
-                    if root[v] != r {
-                        has_ingoing.insert(r);
-                        break 'dfs2;
-                    }
-                    stack.push(v);
+            for &v in &adjr[u] {
+                if root[v] != r {
+                    has_ingoing.insert(r);
                 }
             }
         }
