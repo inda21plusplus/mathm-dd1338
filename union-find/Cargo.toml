@@ -1,0 +1,16 @@
+[package]
+name = "union-find"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+[[bin]]
+name = "union-find"
+path = "main.rs"
+
+[lib]
+name = "union_find"
+path = "lib.rs"
