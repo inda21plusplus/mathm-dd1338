@@ -12,3 +12,10 @@ version = "0.1.0"
 dependencies = [
  "algorithms",
 ]
+
+[[package]]
+name = "kattis-open-unionfind"
+version = "0.1.0"
+dependencies = [
+ "algorithms",
+]

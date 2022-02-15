@@ -16,7 +16,7 @@ fn main() {
     let (n, q) = (nq.next().unwrap(), nq.next().unwrap());
     let mut output = String::with_capacity(q * 4);
 
-    let mut uf = union_find::UnionFind::<Vec<usize>>::new(n);
+    let mut uf = algorithms::UnionFind::<Vec<usize>>::new(n);
     for _ in 0..q {
         let line = lines.next().unwrap().trim();
         let op = &line[0..1];
