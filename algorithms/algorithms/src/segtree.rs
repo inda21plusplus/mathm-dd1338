@@ -1,4 +1,4 @@
-use std::ops::{AddAssign, Range, Sub};
+use std::ops::Range;
 
 #[derive(Debug, Clone)]
 pub struct SegmentTree<T, F, U> {
@@ -16,10 +16,9 @@ pub enum Side {
 
 impl<T, F, U> SegmentTree<T, F, U>
 where
-    T: Copy + AddAssign + Sub<Output = T> + Default,
+    T: Copy,
     F: Fn(T, T) -> T,
     U: Fn() -> T,
-    T: std::fmt::Display,
 {
     pub fn new(len: usize, f: F, unit: U) -> Self {
         let halflen = len.next_power_of_two();
@@ -30,11 +29,11 @@ where
             unit,
         }
     }
-    pub fn from(xs: &[T], f: F, unit: U) -> Self {
+    pub fn from<I: ExactSizeIterator<Item = T>>(xs: I, f: F, unit: U) -> Self {
         let halflen = xs.len().next_power_of_two();
         let mut a = vec![unit(); halflen * 2];
-        for (v, x) in a[halflen..].iter_mut().zip(xs.iter()) {
-            *v = *x;
+        for (v, x) in a[halflen..].iter_mut().zip(xs) {
+            *v = x;
         }
         let mut s = Self {
             halflen,
@@ -145,7 +144,7 @@ mod tests {
 
     #[test]
     fn from() {
-        let st = SegmentTree::from(&[4, 9, 1], |a, b| a + b, || 0);
+        let st = SegmentTree::from([4, 9, 1].into_iter(), |a, b| a + b, || 0);
         eprintln!("{:?}", st.a);
         assert_eq!(4, st.query(0..1));
         assert_eq!(9, st.query(1..2));
@@ -159,7 +158,7 @@ mod tests {
 
     #[test]
     fn change_many() {
-        let mut st = SegmentTree::from(&[1, 2, 3, 8], |a, b| a.max(b), || 0);
+        let mut st = SegmentTree::from([1, 2, 3, 8].into_iter(), |a, b| a.max(b), || 0);
         eprintln!("{:?}", st.a);
         assert_eq!(8, st.query(0..4));
         st.change_many(|xs| {
@@ -173,7 +172,7 @@ mod tests {
 
     #[test]
     fn prefer_when() {
-        let st = SegmentTree::from(&[4, 3, 1, 1, 2], |a, b| a.min(b), || usize::MAX);
+        let st = SegmentTree::from([4, 3, 1, 1, 2].into_iter(), |a, b| a.min(b), || usize::MAX);
         eprintln!("{:?}", st.a);
         assert_eq!(Some(2), st.prefer_when(Side::Left, |x| x <= 1));
         assert_eq!(Some(2), st.prefer_when(Side::Left, |x| x <= 2));

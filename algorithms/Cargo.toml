@@ -1,3 +1,8 @@
 [workspace]
 
-members = [ "algorithms", "kattis-open-longincsubseq", "kattis-open-unionfind" ]
+members = [
+    "algorithms",
+    "kattis-open-longincsubseq",
+    "kattis-open-unionfind",
+    "kattis-open-hashing",
+]

@@ -7,6 +7,13 @@ name = "algorithms"
 version = "0.1.0"
 
 [[package]]
+name = "kattis-open-hashing"
+version = "0.1.0"
+dependencies = [
+ "algorithms",
+]
+
+[[package]]
 name = "kattis-open-longincsubseq"
 version = "0.1.0"
 dependencies = [
