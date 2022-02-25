@@ -6,4 +6,5 @@ members = [
     "kattis-open-unionfind",
     "kattis-open-hashing",
     "kattis-open-fenwick",
+    "kattis-open-ultraquicksort",
 ]

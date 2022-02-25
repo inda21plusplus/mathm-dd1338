@@ -29,7 +29,7 @@ impl<T: Copy + Default> FenwickTree<Vec<T>> {
     }
 }
 
-impl<const N: usize, T: Copy + Default> FenwickTree<[T; N]> {
+impl<T: Copy + Default, const N: usize> FenwickTree<[T; N]> {
     pub fn new() -> Self {
         Self {
             a: [T::default(); N],
