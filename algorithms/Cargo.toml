@@ -5,4 +5,5 @@ members = [
     "kattis-open-longincsubseq",
     "kattis-open-unionfind",
     "kattis-open-hashing",
+    "kattis-open-fenwick",
 ]
