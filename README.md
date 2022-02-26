@@ -7,3 +7,4 @@ Todo:
   * [ ] Solve https://open.kattis.com/problems/orders
   * [ ] Solve https://open.kattis.com/problems/bond
   * [ ] Solve https://open.kattis.com/problems/classrooms
+  * [ ] Solve https://open.kattis.com/problems/more10
