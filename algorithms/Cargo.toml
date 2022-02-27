@@ -7,4 +7,5 @@ members = [
     "kattis-open-hashing",
     "kattis-open-fenwick",
     "kattis-open-ultraquicksort",
+    "kattis-open-stringmatching",
 ]
