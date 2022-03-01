@@ -28,6 +28,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "kattis-open-pointinpolygon"
+version = "0.1.0"
+dependencies = [
+ "algorithms",
+]
+
+[[package]]
 name = "kattis-open-stringmatching"
 version = "0.1.0"
 

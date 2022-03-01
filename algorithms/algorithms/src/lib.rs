@@ -1,4 +1,4 @@
-#![feature(test)]
+#![feature(test, array_zip)]
 
 mod binary_search;
 mod fenwick;
@@ -6,6 +6,8 @@ mod longest_increasing_subsequence;
 mod quicksort;
 mod segtree;
 mod union_find;
+
+pub mod geometry;
 
 pub use binary_search::binary_search;
 pub use fenwick::FenwickTree;

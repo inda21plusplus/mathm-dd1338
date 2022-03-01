@@ -8,4 +8,5 @@ members = [
     "kattis-open-fenwick",
     "kattis-open-ultraquicksort",
     "kattis-open-stringmatching",
+    "kattis-open-pointinpolygon",
 ]
