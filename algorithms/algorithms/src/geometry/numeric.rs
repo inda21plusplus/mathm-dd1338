@@ -1,3 +1,4 @@
+use std::iter::Sum;
 use std::{fmt, ops};
 
 pub trait Numeric:
@@ -10,6 +11,8 @@ pub trait Numeric:
     + ops::Mul<Output = Self>
     + ops::Div<Output = Self>
     + PartialOrd
+    + PartialEq
+    + Sum
 {
     const ZERO: Self;
     const ONE: Self;
@@ -34,7 +37,7 @@ impl_numeric!(u64, 0, 1);
 impl_numeric!(i64, 0, 1);
 impl_numeric!(u128, 0, 1);
 impl_numeric!(i128, 0, 1);
-impl_numeric!(f32, 0., 1.);
-impl_numeric!(f64, 0., 1.);
+// impl_numeric!(f32, 0., 1.);
+// impl_numeric!(f64, 0., 1.);
 impl_numeric!(isize, 0, 1);
 impl_numeric!(usize, 0, 1);

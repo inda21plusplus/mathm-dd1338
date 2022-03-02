@@ -4,14 +4,24 @@ use std::{fmt, ops};
 #[macro_export]
 macro_rules! v {
     ($($x:expr),*) => {
-        Vector::from([$($x, )*])
+        $crate::geometry::Vector::from([$($x, )*])
     };
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Vector<T, const N: usize>([T; N])
 where
     T: Numeric;
+
+impl<T: Numeric, const N: usize> IntoIterator for Vector<T, N> {
+    type Item = T;
+
+    type IntoIter = <[T; N] as IntoIterator>::IntoIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
 
 impl<T: Numeric> Vector<T, 2> {
     pub fn new(x: T, y: T) -> Self {

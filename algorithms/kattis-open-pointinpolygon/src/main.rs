@@ -3,7 +3,8 @@
 use std::fmt::Write;
 use std::io::{stdin, Read};
 
-use algorithms::geometry::{polygon::Contains, Polygon, Vector};
+use algorithms::geometry::{polygon::Contains, Polygon, PolygonMethods};
+use algorithms::v;
 
 fn main() {
     let mut input = String::new();
@@ -19,14 +20,10 @@ fn main() {
         if n == 0 {
             break;
         }
-        let polygon = Polygon::new(
-            (0..n)
-                .map(|_| Vector::<i16, 2>::new(get(), get()))
-                .collect(),
-        );
+        let polygon = Polygon::<i16, false>::new((0..n).map(|_| v!(get(), get())).collect());
         let m = get();
         for _ in 0..m {
-            let point = Vector::<i16, 2>::new(get(), get());
+            let point = v!(get(), get());
             writeln!(
                 output,
                 "{}",

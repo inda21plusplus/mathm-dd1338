@@ -9,4 +9,5 @@ members = [
     "kattis-open-ultraquicksort",
     "kattis-open-stringmatching",
     "kattis-open-pointinpolygon",
+    "kattis-open-convexhull",
 ]
