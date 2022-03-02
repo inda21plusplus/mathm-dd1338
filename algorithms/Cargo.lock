@@ -27,6 +27,12 @@ dependencies = [
  "wasi",
 ]
 
+[[package]]
+name = "kattis-open-blowingcandles"
+version = "0.1.0"
+dependencies = [
+ "algorithms",
+]
 
 [[package]]
 name = "kattis-open-convexhull"

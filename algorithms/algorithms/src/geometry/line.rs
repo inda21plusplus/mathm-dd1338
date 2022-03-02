@@ -1,8 +1,8 @@
 use std::fmt;
 
-use super::{Numeric, Vector};
+use super::{Scalar, Vector};
 
-pub struct AnyLine<T: Numeric, const N: usize, const INFINITE: bool>(
+pub struct AnyLine<T: Scalar, const N: usize, const INFINITE: bool>(
     pub Vector<T, N>,
     pub Vector<T, N>,
 );
@@ -10,7 +10,7 @@ pub struct AnyLine<T: Numeric, const N: usize, const INFINITE: bool>(
 pub type Line<T, const N: usize> = AnyLine<T, N, true>;
 pub type LineSegment<T, const N: usize> = AnyLine<T, N, false>;
 
-impl<T: Numeric, const INFINITE: bool> AnyLine<T, 2, INFINITE> {
+impl<T: Scalar, const INFINITE: bool> AnyLine<T, 2, INFINITE> {
     pub fn new(a: Vector<T, 2>, b: Vector<T, 2>) -> Self {
         Self(a, b)
     }
@@ -23,19 +23,19 @@ impl<T: Numeric, const INFINITE: bool> AnyLine<T, 2, INFINITE> {
     }
 }
 
-impl<T: Numeric, const N: usize> LineSegment<T, N> {
+impl<T: Scalar, const N: usize> LineSegment<T, N> {
     pub fn len_sq(&self) -> T {
         (self.0 - self.1).into_iter().map(|x| x * x).sum()
     }
 }
 
-impl<T: Numeric, const N: usize> fmt::Debug for LineSegment<T, N> {
+impl<T: Scalar, const N: usize> fmt::Debug for LineSegment<T, N> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "(| {:?} --> {:?} |)", self.0, self.1)
     }
 }
 
-impl<T: Numeric, const N: usize> fmt::Debug for Line<T, N> {
+impl<T: Scalar, const N: usize> fmt::Debug for Line<T, N> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "(--> {:?} --> {:?} -->)", self.0, self.1)
     }

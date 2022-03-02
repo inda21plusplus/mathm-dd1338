@@ -1,9 +1,9 @@
 use std::{cmp::Ordering, ops};
 
-use super::{line::Side, Line, LineSegment, Numeric, Vector};
+use super::{line::Side, Line, LineSegment, Scalar, Vector};
 
 #[derive(Debug, Clone)]
-pub struct Polygon<T: Numeric, const CONVEX: bool = false> {
+pub struct Polygon<T: Scalar, const CONVEX: bool = false> {
     points: Vec<Vector<T, 2>>,
 }
 
@@ -11,7 +11,7 @@ pub struct Polygon<T: Numeric, const CONVEX: bool = false> {
 /// depending on compile time constants.
 ///
 /// In time complexities, *n* is the amount of points in the polygon.
-pub trait PolygonMethods<T: Numeric> {
+pub trait PolygonMethods<T: Scalar> {
     /// Returns an iterator over the line segments of `self`
     fn lines<'a>(&'a self) -> Lines<'a, T>;
 
@@ -38,7 +38,7 @@ pub trait PolygonMethods<T: Numeric> {
     fn contains(&self, point: Vector<T, 2>) -> Contains;
 }
 
-impl<T: Numeric, const CONVEX: bool> Polygon<T, CONVEX> {
+impl<T: Scalar, const CONVEX: bool> Polygon<T, CONVEX> {
     pub fn len(&self) -> usize {
         self.points.len()
     }
@@ -50,7 +50,7 @@ impl<T: Numeric, const CONVEX: bool> Polygon<T, CONVEX> {
     }
 }
 
-impl<T: Numeric> Polygon<T, true> {
+impl<T: Scalar> Polygon<T, true> {
     /// Returns `self` as a not neccessarily convex `Polygon`.
     pub fn unconvexify(&self) -> &Polygon<T, false> {
         // SAFETY: They're the same god dang thing
@@ -58,7 +58,7 @@ impl<T: Numeric> Polygon<T, true> {
     }
 }
 
-impl<T: Numeric> Polygon<T, false> {
+impl<T: Scalar> Polygon<T, false> {
     pub fn new(points: Vec<Vector<T, 2>>) -> Self {
         Self { points }
     }
@@ -87,7 +87,7 @@ impl<T: Numeric> Polygon<T, false> {
     }
 }
 
-impl<T: Numeric> PolygonMethods<T> for Polygon<T, true> {
+impl<T: Scalar> PolygonMethods<T> for Polygon<T, true> {
     fn lines<'a>(&'a self) -> Lines<'a, T> {
         Lines {
             polygon: &self.unconvexify(),
@@ -109,7 +109,7 @@ impl<T: Numeric> PolygonMethods<T> for Polygon<T, true> {
     }
 }
 
-impl<T: Numeric> PolygonMethods<T> for Polygon<T, false> {
+impl<T: Scalar> PolygonMethods<T> for Polygon<T, false> {
     fn lines<'a>(&'a self) -> Lines<'a, T> {
         Lines {
             polygon: self,
@@ -241,7 +241,7 @@ impl<T: Numeric> PolygonMethods<T> for Polygon<T, false> {
     }
 }
 
-impl<T: Numeric, const CONVEX: bool> ops::Index<usize> for Polygon<T, CONVEX> {
+impl<T: Scalar, const CONVEX: bool> ops::Index<usize> for Polygon<T, CONVEX> {
     type Output = Vector<T, 2>;
 
     fn index(&self, i: usize) -> &Self::Output {
@@ -249,7 +249,7 @@ impl<T: Numeric, const CONVEX: bool> ops::Index<usize> for Polygon<T, CONVEX> {
     }
 }
 
-impl<T: Numeric, const CONVEX: bool> ops::Index<isize> for Polygon<T, CONVEX> {
+impl<T: Scalar, const CONVEX: bool> ops::Index<isize> for Polygon<T, CONVEX> {
     type Output = Vector<T, 2>;
 
     fn index(&self, i: isize) -> &Self::Output {
@@ -263,7 +263,7 @@ impl<T: Numeric, const CONVEX: bool> ops::Index<isize> for Polygon<T, CONVEX> {
     }
 }
 
-impl<T: Numeric> ops::IndexMut<usize> for Polygon<T, false> {
+impl<T: Scalar> ops::IndexMut<usize> for Polygon<T, false> {
     fn index_mut(&mut self, i: usize) -> &mut Self::Output {
         &mut self.points[i]
     }
@@ -275,7 +275,7 @@ impl<T: Numeric> ops::IndexMut<usize> for Polygon<T, false> {
 /// # Time complexity
 /// O(*n* * *m*) where *m* is the amount of points considered equally minimum (in the first axis
 /// and then the second axis). Which is in the worst case O(*n*^2)
-impl<T: Numeric, const CONVEX_A: bool, const CONVEX_B: bool> PartialEq<Polygon<T, CONVEX_B>>
+impl<T: Scalar, const CONVEX_A: bool, const CONVEX_B: bool> PartialEq<Polygon<T, CONVEX_B>>
     for Polygon<T, CONVEX_A>
 {
     fn eq(&self, other: &Polygon<T, CONVEX_B>) -> bool {
@@ -346,12 +346,12 @@ pub enum Contains {
     Outside,
 }
 
-pub struct Lines<'a, T: Numeric> {
+pub struct Lines<'a, T: Scalar> {
     polygon: &'a Polygon<T, false>,
     i: usize,
 }
 
-impl<'a, T: Numeric> Iterator for Lines<'a, T> {
+impl<'a, T: Scalar> Iterator for Lines<'a, T> {
     type Item = LineSegment<T, 2>;
 
     fn next(&mut self) -> Option<Self::Item> {

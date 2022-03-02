@@ -1,11 +1,11 @@
 mod line;
-mod numeric;
 pub mod polygon;
+mod scalar;
 mod vector;
 
 pub use line::{Line, LineSegment};
-pub use numeric::Numeric;
 pub use polygon::{Polygon, PolygonMethods};
+pub use scalar::Scalar;
 pub use vector::Vector;
 
 #[cfg(test)]

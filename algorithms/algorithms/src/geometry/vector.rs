@@ -1,4 +1,4 @@
-use crate::geometry::Numeric;
+use crate::geometry::Scalar;
 use std::{fmt, ops};
 
 #[macro_export]
@@ -11,9 +11,9 @@ macro_rules! v {
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Vector<T, const N: usize>([T; N])
 where
-    T: Numeric;
+    T: Scalar;
 
-impl<T: Numeric, const N: usize> IntoIterator for Vector<T, N> {
+impl<T: Scalar, const N: usize> IntoIterator for Vector<T, N> {
     type Item = T;
 
     type IntoIter = <[T; N] as IntoIterator>::IntoIter;
@@ -23,7 +23,16 @@ impl<T: Numeric, const N: usize> IntoIterator for Vector<T, N> {
     }
 }
 
-impl<T: Numeric> Vector<T, 2> {
+impl<T: Scalar, const N: usize> Vector<T, N> {
+    pub fn len_sq(&self) -> T {
+        self.into_iter().map(|x| x * x).sum()
+    }
+    // pub fn len(&self) -> T {
+    //     self.len_sq().sqrt()
+    // }
+}
+
+impl<T: Scalar> Vector<T, 2> {
     pub fn new(x: T, y: T) -> Self {
         Self([x, y])
     }
@@ -35,7 +44,7 @@ impl<T: Numeric> Vector<T, 2> {
     }
 }
 
-impl<T: Numeric> Vector<T, 3> {
+impl<T: Scalar> Vector<T, 3> {
     pub fn new(x: T, y: T, z: T) -> Self {
         Self([x, y, z])
     }
@@ -50,7 +59,7 @@ impl<T: Numeric> Vector<T, 3> {
     }
 }
 
-impl<T: Numeric> Vector<T, 4> {
+impl<T: Scalar> Vector<T, 4> {
     pub fn new(x: T, y: T, z: T, w: T) -> Self {
         Self([x, y, z, w])
     }
@@ -59,19 +68,19 @@ impl<T: Numeric> Vector<T, 4> {
     }
 }
 
-impl<T: Numeric, const N: usize> From<[T; N]> for Vector<T, N> {
+impl<T: Scalar, const N: usize> From<[T; N]> for Vector<T, N> {
     fn from(vs: [T; N]) -> Self {
         Self(vs)
     }
 }
 
-impl<T: Numeric> Vector<T, 2> {
+impl<T: Scalar> Vector<T, 2> {
     pub fn cross(&self, rhs: Self) -> T {
         self[0] * rhs[1] - self[1] * rhs[0]
     }
 }
 
-impl<T: Numeric> Vector<T, 3> {
+impl<T: Scalar> Vector<T, 3> {
     pub fn cross(&self, rhs: &Self) -> Self {
         Self([
             self[1] * rhs[2] - self[2] * rhs[1],
@@ -81,7 +90,7 @@ impl<T: Numeric> Vector<T, 3> {
     }
 }
 
-impl<T: Numeric, const N: usize> ops::Add for Vector<T, N> {
+impl<T: Scalar, const N: usize> ops::Add for Vector<T, N> {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
@@ -89,7 +98,7 @@ impl<T: Numeric, const N: usize> ops::Add for Vector<T, N> {
     }
 }
 
-impl<T: Numeric, const N: usize> ops::Sub for Vector<T, N> {
+impl<T: Scalar, const N: usize> ops::Sub for Vector<T, N> {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
@@ -97,7 +106,7 @@ impl<T: Numeric, const N: usize> ops::Sub for Vector<T, N> {
     }
 }
 
-impl<T: Numeric, const N: usize> ops::Index<usize> for Vector<T, N> {
+impl<T: Scalar, const N: usize> ops::Index<usize> for Vector<T, N> {
     type Output = T;
 
     fn index(&self, index: usize) -> &Self::Output {
@@ -105,13 +114,13 @@ impl<T: Numeric, const N: usize> ops::Index<usize> for Vector<T, N> {
     }
 }
 
-impl<T: Numeric, const N: usize> ops::IndexMut<usize> for Vector<T, N> {
+impl<T: Scalar, const N: usize> ops::IndexMut<usize> for Vector<T, N> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         &mut self.0[index]
     }
 }
 
-impl<T: Numeric, const N: usize> fmt::Debug for Vector<T, N>
+impl<T: Scalar, const N: usize> fmt::Debug for Vector<T, N>
 where
     T: fmt::Debug,
 {
@@ -124,7 +133,7 @@ where
     }
 }
 
-impl<T: Numeric, const N: usize> fmt::Display for Vector<T, N>
+impl<T: Scalar, const N: usize> fmt::Display for Vector<T, N>
 where
     T: fmt::Display,
 {
