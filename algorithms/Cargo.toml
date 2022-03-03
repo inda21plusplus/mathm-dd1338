@@ -11,4 +11,5 @@ members = [
     "kattis-open-blowingcandles",
     "kattis-open-pointinpolygon",
     "kattis-open-convexhull",
+    "kattis-open-triangleornaments",
 ]
