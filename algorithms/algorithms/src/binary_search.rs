@@ -9,6 +9,8 @@ use std::ops::Range;
 ///
 /// # Time complexity
 /// *O*(log((*r*.*end*-*r*.*start*) * *T*)) where *T* is the time complexity of *p*
+/// or: *O*(log *n*) where *n* is the length of the range *r* and *T*'s time complexity is
+/// constant.
 ///
 /// # Examples
 /// To find the index of an element in a sorted array:

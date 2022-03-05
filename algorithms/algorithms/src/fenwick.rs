@@ -1,17 +1,14 @@
+// Heres an implementation in APL:
 // ⎕IO ← 0
 // bits       ← 2∘⊥⍣¯1
 // lsb        ← 2⊥⊢(^⍥bits)-
 
-// inc_index  ← {(⍵↑⍺),(1+⍵⌷⍺),⍵↓⍺}
-// inc        ← {⍵=0 : (1+⊃⍺),1↓⍺ ⋄ ⍵<≢⍺ : (⍺ inc_index ⍵)∇(⊢+lsb)⍵ ⋄ ⍺}
-// prefix_sum ← {⍵>0 : (⍵⌷⍺)+⍺∇(⊢-lsb)⍵ ⋄ ⊃⍺}
-
-// dnidxs     ← {⍵<0 :⍬ ⋄ (0≥⊃⌽⍵) :    ⍵ ⋄  ∇⍵,(⊢-lsb)¯1∘↑⍵}
+// dnidxs     ← {⍵<0 :⍬⋄ (0≥⊃⌽⍵) :    ⍵ ⋄  ∇⍵,(⊢-lsb)¯1∘↑⍵}
 // upidxs     ← {⍵≡0 :0 ⋄ (⍺≤⊃⌽⍵) : ¯1↓⍵ ⋄ ⍺∇⍵,(⊢+lsb)¯1∘↑⍵}
-// inc        ← {⍵+(⍳∊upidxs∘⍺)≢⍵}
-// sum        ← {+/⍵[dnidxs ⍺-1]}
+// inc        ← {⍵+(⍳∊upidxs∘⍺)≢⍵} ⍝ O(n) time complexity (which destroys the whole purpose)
+// sum        ← {+/⍵[dnidxs ⍺-1]}  ⍝ O(log n) time complexity
 
-use std::ops::{AddAssign, Index, IndexMut, Sub};
+use std::ops::{AddAssign, Index, IndexMut};
 
 fn lsb(x: usize) -> usize {
     (x as isize & -(x as isize)) as usize
@@ -42,7 +39,7 @@ where
     A: Index<usize, Output = T>,
     A: IndexMut<usize>,
     A: AsRef<[T]>, // for .len()
-    T: Copy + AddAssign + Sub<Output = T> + Default,
+    T: Copy + AddAssign + Default,
 {
     pub fn prefix_sum(&self, mut i: usize) -> T {
         i = match i.checked_sub(1) {
