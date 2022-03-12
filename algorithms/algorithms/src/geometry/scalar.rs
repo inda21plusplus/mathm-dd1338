@@ -38,6 +38,6 @@ impl_numeric!(i16, 0, 1);
 impl_numeric!(i32, 0, 1);
 impl_numeric!(i64, 0, 1);
 impl_numeric!(i128, 0, 1);
-// impl_numeric!(f32, 0., 1.);
-// impl_numeric!(f64, 0., 1.);
+impl_numeric!(f32, 0., 1.);
+impl_numeric!(f64, 0., 1.);
 impl_numeric!(isize, 0, 1);
